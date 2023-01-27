@@ -9,3 +9,5 @@ sass:
   load_paths: 
     - _sass
 
+site.url: https://n8-wright.github.io/nathanieljwright.github.io
+
