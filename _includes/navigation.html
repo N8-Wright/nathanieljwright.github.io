@@ -1,6 +1,6 @@
 <nav class="navbar navbar-light bg-light" aria-label="Site Navigation">
     <div class="container-fluid">
-        <a class="navbar-brand" href="/">Nathaniel Wright</a>
+        <a class="navbar-brand" href="{{ site.baseurl}}/">Nathaniel Wright</a>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#siteNavbar" aria-controls="siteNavbar" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
@@ -8,7 +8,7 @@
             <ul class="navbar-nav me-auto mb-2">
                 {% for item in site.data.navigation %}
                     <li class="nav-item">
-                        <a class="nav-link{% if page.url == item.link %} active{% endif %}"{% if page.url == item.link %} aria-current="page"{% endif %} href="{{ site.url}}{{ item.link }}">
+                        <a class="nav-link{% if page.url == item.link %} active{% endif %}"{% if page.url == item.link %} aria-current="page"{% endif %} href="{{ site.baseurl }}{{ item.link }}">
                             {{ item.name }}
                         </a>
                     </li>

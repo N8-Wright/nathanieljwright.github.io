@@ -8,5 +8,5 @@ title: Home
 {% for post in site.posts limit:2 %}
     <h4>{{post.title}}</h4>
     {{ post.excerpt }}
-    <a href="{{post.url}}">Continue reading...</a>
+    <a href="{{ site.baseurl }}{{ post.url }}">Continue reading...</a>
 {% endfor %}
