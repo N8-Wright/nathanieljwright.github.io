@@ -1,0 +1,69 @@
+---
+layout: post
+author: nathan
+---
+<p>
+    A week or two ago I installed Lineage OS on Ellie's OnePlus
+    6T. The phone had been giving her problems for the better part of
+    a year (as far as I can tell…could have been much longer). Apps
+    would open slowly and would randomly crash. Battery life was
+    dismal and it was a bad idea to leave home without a charger. So,
+    I took it upon myself to try to fix the issues with the phone by
+    installing a custom Android ROM called Lineage OS. As far as I
+    understand, it's a version of Android that stays as close to stock
+    as possible (it doesn't even include the Google Apps or Play Store
+    by default). Did this fix the problems plaguing the OnePlus 6T?
+    Well…somewhat. Some issues were resolved, new ones were
+    introduced.  Overall, this wasn't the silver bullet I was
+    originally hoping for 🙄.
+</p>
+
+<h2>The installation process</h2>
+<p>
+    After backing up all the documents and photos to Ellie's google
+    drive, I set out to blow away the default Android install and
+    replace it with Lineage. I'd read the documentation twice before
+    starting (like it was recommended) but immediately ran into issues
+    trying to unlock the bootloader. With some extra help and
+    manhandling the drivers into submission via Window's Device Manger
+    just to get the phone connected over USB I was able to follow the
+    installation instructions without a hitch.
+</p>
+
+<h2>SIM not detected</h2> 
+<p>
+  Once Lineage OS was installed, I was presented with a new problem:
+  the SIM card wasn't detected! After some extensive googling and a
+  lot of trial and error (some of which got the phone into a weird
+  boot loop) I was able to fix all the issues and everybody lived
+  happily ever after! Well…. no. Actually, I gave up and went to
+  bed. But the next morning I gave it another go, despite my
+  frustrations.
+</p>
+<p>
+  It turns out that you can't rely on just the
+  bootloader and whatever firmware/drivers that Lineage OS brings by
+  default. I ended up using this nifty tool to extract the firmware
+  from the original OnePlus android iso and flashed each binary file
+  to the phone while it was in recovery mode. After yet another
+  re-install of Lineage, the SIM was detected!
+</p>
+
+<h2>Issues With Lineage OS</h2>
+<p>
+  With that grueling process over and done with we now have a working
+  phone again. Most of the things Ellie does with on a day-to-day
+  basis is supported. However, we had to go through the process of
+  setting certain apps again that I didn't think about before wiping
+  it (Duo was the most annoying). Some apps just didn't seem to be
+  supported either. We couldn't find Park Mobile on the play store
+  anymore and couldn't find a way to install it. While the battery
+  life of the phone is a bit better, I don't think installing Lineage
+  resolved any of the major issues Ellie had with the phone. Apps
+  still crash (mostly the google apps 😒). The phone seems less
+  sluggish, but the benefits there are replaced with the frustration
+  of having to learn the different user interface of Lineage than what
+  Ellie was used to. In the end, I think we're getting a new phone for
+  Ellie pretty soon. And I probably won't try to mess with her tech
+  anymore, even though I did so with good intentions.
+</p>
