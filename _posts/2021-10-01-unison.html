@@ -1,0 +1,36 @@
+---
+layout: post
+author: nathan
+---
+
+<p>
+    I've been in the process of figuring out an easy back up and sharing solution for all my files. I have several
+    computers that I'd like to share files between. For me, that means being able to access an up-to-date “Documents”
+    and “Projects” folder. Other stuff that could get quite large, like photo and video, are included in this setup
+    currently, but could be broken out into a different process if they become unwieldy to have on every single device.
+</p>
+
+<p>
+    What I've had for a while now, and have been manually managing, is a desktop computer running windows and sharing a
+    network drive with SMB over the local network. There are a few annoyances with doing this on a Windows 11 Home
+    system. One REALLY annoying thing is that you can't login over the network with your main user account since that is
+    a Microsoft account and not a local one. You also can't just turn off user validation and allow anyone on the
+    network into the drive…for reasons that I still don't quite understand. What I ended up having to do is create and
+    grant access to a “Nathan Network” local user that I could login in with. I assume I wouldn't run into the same
+    problems on a server edition of the OS, but I'm not paying for that. I've experimenting with this setup on Linux
+    over Samba and had a much nicer experience, but then I couldn't multipurpose the home server for my precious video
+    games.
+</p>
+
+<p>
+    What I've added though is a cool little program called Unison. It's basically a rsync type of program that can
+    synchronize files in both directions. So, if I make an edit on my laptop that can be synced with the server. If I
+    make an edit on the server that can be synced back with the laptop as well. This bidirectional sharing happens with
+    just the Unison program running from the laptop and scanning for changes server-side and client-side. So now,
+    instead of manually copying files back and forth that I've changed, I can have something a little bit closer to
+    Dropbox/OneDrive, albeit, still, a more manual one.
+</p>
+
+<p>
+    The UI isn't the prettiest, but usable. And you can always run through the command line if that's your jam.
+</p>

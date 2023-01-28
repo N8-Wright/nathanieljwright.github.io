@@ -1,0 +1,24 @@
+---
+layout: post
+author: nathan
+---
+
+<p>
+    I've had a really bad time in the past connecting my Sony headphones to my laptop running Linux Mint. Specifically,
+    it's the Sony WH-XB910N, although I'm fairly sure I'd have issues pairing with any other headphones. Previously,
+    I've either not been able to pair them at all, or when paired successfully there would be issues. The headphones
+    would work, but I wouldn't be able to use the microphone.
+</p>
+
+<p>
+    It turns out (at least for the pairing issue), the fix to get it working was simple once I started messing around
+    with the network settings.
+</p>
+
+<img class="rounded mx-auto d-block" src="{{ site.baseurl }}/assets/images/settings-page.png"></img>
+
+<p>
+    I toggled PAN Support and DUN Support to Blueman (the default Bluetooth manager in Linux Mint) from it's original
+    setting of NetworkManager. Magically, this got my headset to pair correctly! I don't know which setting actually is
+    needed (or if both are), but I haven't experienced any negative consequences from these changes so 🤷
+</p>

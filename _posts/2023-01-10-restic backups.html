@@ -1,0 +1,37 @@
+---
+layout: post
+author: nathan
+---
+
+<p>
+    I've been getting a lot more comfortable managing my local ZFS filesystem over the past year. I've gotten to a point
+    where I'm confident in my ability to troubleshoot any basic issues that I could encounter. Although, fortunately,
+    they have been few and far between. I've ditched Nextcloud and replaced it with just a simple samba configuration.
+    For my personal needs, this has been an acceptable change and there's a lot less server management/setup that I have
+    to keep in mind. This change makes my local backups easier as well, since I no longer run services that use a SQL
+    database and don't have to deal with correctly backing those up.
+</p>
+
+<p>
+    It's only this year that I've started to dip my toes into backing up my data to the cloud. Since I have a Office365
+    subscription, I wanted to take advantage of the 1TB of storage that I get in OneDrive instead of spending more money
+    on a separate backup endpoint. At least, I don't want to at the moment… So I needed to choose something that works
+    with backing up to OneDrive.
+</p>
+
+<p>
+    I ended up choosing <a href="https://restic.net/">Restic</a> since it can operate with rclone. <a
+        href="https://github.com/rclone/rclone">Rclone</a> is the actual
+    thing that connects to OneDrive
+    and Restic, the backup tool, can be configured to use it to write and read the files that it needs to. I followed
+    <a href="https://itsfoss.com/use-onedrive-linux-rclone/">this guide</a> on how to set up rclone with OneDrive, but
+    you can configure it to talk to <a href="https://github.com/rclone/rclone#storage-providers">a whole bunch of
+        different
+        services</a> as well.
+</p>
+
+<p>
+    Currently I don't do anything fancy to keep the backups up to date. I have a script with the directories I care
+    about listed out that I just run manually. I'll be experimenting more with this system in the future, but for now
+    I'm just happy that all of my important (and some less important) data is backed up locally as well as remotely.
+</p>

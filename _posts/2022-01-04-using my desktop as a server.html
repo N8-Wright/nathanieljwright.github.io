@@ -1,0 +1,70 @@
+---
+layout: post
+author: nathan
+---
+
+<p>
+    I've been wanting a home server for a while now. Both as a way to try out new technology and as a practical way to
+    aggregate my digital life into one place. In the past I've done some experimenting with standing up self-hosted
+    services on Linode, but I don't need these services everywhere I go and I wanted more storage space than I was
+    willing to pay for in the cloud. For the most part, I'm only on my computer while at home so standing up services on
+    the LAN is a simpler solution than relying on cloud hosting.
+</p>
+
+<img class="rounded mx-auto d-block" src="{{ site.baseurl }}/assets/images/computer.png"></img>
+
+<p>
+    So recently I bit the bullet and purchased two 4TB Seagate Iron Wolf NAS drives and put them in my desktop. I had
+    previously only used this computer to play games and host a small Minecraft server for my friends. Since it was
+    going to be primarily a server from now on, I nuked my install of Windows and replaced it with Ubuntu 22.04. While
+    I've gotten familiar with Windows in the past year due to work, Linux is still where I'm most comfortable when it
+    comes to anything server related.
+</p>
+
+<p>
+    Other than familiarity there is one major advantage that got me set on using Ubuntu for this desktop overhaul: the
+    ZFS filesystem. Compared to the NTFS filesystem of Windows, ZFS has desirable features that I want when managing a
+    server long term. Notably, ensuring data integrity through several different forms of software RAID is something
+    NTFS just can't offer. Any kind of data corruption that is found on disk can be corrected with information stored on
+    the other disks with a ZFS pool. Microsoft has been developing a filesystem similar to ZFS called ReFS, but that is
+    only available on the server OS versions.
+</p>
+
+<p>
+    To set up ZFS I put my two new drives in a mirrored pool so that I could take advantage of ZFS' error correction and
+    detection. While this cuts my usable storage space in half, from 8TB to 4TB, I'd rather have the increased
+    reliability that ZFS offers over the extra storage space. I'm not anywhere near needing the full 8TB (let alone the
+    4TB of usable space) so using the data integrity features that ZFS offers seems like a no brainer.
+</p>
+
+<p>
+    I set up Nextcloud as the primary way of syncing files between computers (both my files and Ellie's). I could have
+    just used samba and avoided the more involved process of setting up a LAMP stack, but I wanted something user
+    friendly for Ellie, who is used to the Dropbox/OneDrive style of file management. You also get a lot of extra
+    goodies on top of just file syncing. The most interesting to me are the photo organization and sharing application
+    as well as the calendar app.
+</p>
+
+<p>
+    Another reason I chose a Linux distribution for this overhaul of the desktop was to be able to continue playing the
+    video games I enjoy. Otherwise, I might have tried FreeBSD, where ZFS is a native file system, instead of Ubuntu.
+    Valve has made huge investments in the Linux ecosystem and it shows. I was able to play my entire steam library
+    seamlessly. I also got Lutris installed to make playing games outside of Steam fairly painless. Right now, I'm
+    playing Guild Wars 2 through Lutris with great performance.
+</p>
+
+<p>
+    This is not to say that everything is as easy as it was on Windows in the gaming realm of things. There was an issue
+    with the July 19th update to GW2 where the game launcher would crash unexpectedly. I eventually resolved this by
+    trying out different wine runtimes. The fshack (full screen hack) variants along with turning shader caching off
+    seems to fix everything for me.
+</p>
+
+<p>
+    There are still some things that I need to figure out to be totally comfortable maintaining this system long term.
+    First, I need a good backup script. I have the following datasets so far: nextcloud, mariadb, and games. I only
+    really care about backing up nextcloud and mariadb since the games can just be re-downloaded if something bad were
+    to happen. I've already worked out how to use ZFS send to copy snapshots to an external drive. However, I don't know
+    enough about backing up SQL databases safely to know I am not corrupting anything on my backup snapshots. This is
+    the one thing I want to figure out sooner rather than later.
+</p>
