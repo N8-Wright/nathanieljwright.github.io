@@ -6,21 +6,21 @@ title: Home
 <div class="container">
     <h1>Nathan Wright's Personal Website</h1>
     <div class="row">
-        <div class="col">
-            <h1>Recent Posts</h1>
-            {% for post in site.posts limit:2 %}
-            <h4>{{post.title}}</h4>
-            {{ post.excerpt }}
-            <a href="{{ site.baseurl }}{{ post.url }}">Continue reading...</a>
-            {% endfor %}
-        </div>
-        <div class="col">
+        <div class="col order-lg-2">
             <img class="rounded mx-auto d-block"
                 src="{{ site.baseurl }}/assets/images/22-07-25 10-07-48 2072.resized.jpg"></img>
             <ul class="text-center list-unstyled">
                 <li>Email me: <a href="mailto: nathan@nathanieljwright.com">nathan@nathanieljwright.com</a></li>
                 <li><a href="https://github.com/N8-Wright">Github</a></li>
             </ul>
+        </div>
+        <div class="col order-lg-1">
+            <h1>Recent Posts</h1>
+            {% for post in site.posts limit:2 %}
+            <h4>{{post.title}}</h4>
+            {{ post.excerpt }}
+            <a href="{{ site.baseurl }}{{ post.url }}">Continue reading...</a>
+            {% endfor %}
         </div>
     </div>
 </div>
