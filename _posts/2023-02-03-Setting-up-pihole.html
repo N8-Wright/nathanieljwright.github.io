@@ -1,0 +1,94 @@
+---
+layout: post
+author: nathan
+title: Setting up PI Hole
+---
+
+<p>
+I've finally gotten around to setting up Pi-hole on my home network. I
+had previously played around with it a few years ago on a Raspberry PI
+3 but eventually just stopped using it. This time around I know a bit
+more about Docker and decided to run the containerized version
+alongside the other services that I have running on my desktop like
+Jellyfin.
+</p>
+
+<p>
+  Pi-hole describes itself as a "DNS sinkhole that protects your
+  devices from unwanted content without installing any client-side
+  software.<sup><a href="https://github.com/pi-hole/pi-hole">1</a></sup>"
+  It comes installed with a good default block list and allows for
+  easy viewing of queries made by everything on the home network.
+</p>
+
+
+<h2>Configuration issues</h2>
+<p>
+  I ran into only one real problem getting the docker-compose.yml
+  working. Using the default configuration
+  from <a href="https://github.com/pi-hole/docker-pi-hole/#running-pi-hole-docker">the
+  docs</a>, I was getting this error when running <code>docker-compose
+  up</code>:
+<pre>
+  <code>
+    ERROR: for pihole Cannot start service pihole: driver failed programming external connectivity on endpoint pihole (1bec1a8867742465aff279b75a80090f7f63fccaf07e2dd171fc44659895cb3f):
+    Error starting userland proxy: listen tcp4 0.0.0.0:53: bind:
+    address already in use ERROR: Encountered errors while bringing up the project.
+  </code>
+  </pre>
+</p>
+
+<p>
+  I found a useful discussion on an issue similar to
+  mine <a href="https://github.com/sameersbn/docker-bind/issues/65">here</a>. The
+  solution was to explicitly specify the localhost address along with
+  the ports listed. My final working docker compose file can be found
+  below:
+</p>
+
+<pre>
+  <code>
+version: "3"
+
+# More info at https://github.com/pi-hole/docker-pi-hole/ and https://docs.pi-hole.net/
+services:
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    ports:
+      - "192.168.1.2:53:53/tcp"
+      - "192.168.1.2:53:53/udp"
+      - "192.168.1.2:80:80/tcp"
+    environment:
+      TZ: 'America/LosAngeles'
+    volumes:
+      - './etc-pihole:/etc/pihole'
+      - './etc-dnsmasq.d:/etc/dnsmasq.d'
+    cap_add:
+      - NET_ADMIN # Required if you are using Pi-hole as your DHCP server, else not needed
+    restart: unless-stopped
+  </code>
+</pre>
+
+<h2>Router Tweaks</h2>
+<p>
+  Next I had to change a router setting to point to my desktop as the
+  DNS server for anyone one the network. I set the primary DNS server
+  to be the local address of my desktop and the secondary as 1.1.1.1.
+  If I really wanted to be sure that everything was being using Pi
+  Hole as the DNS server I wouldn't have any need for the secondary
+  address, but there are times where I'd like to have my desktop off,
+  so it's nice that there is a fallback.
+</p>
+
+<img class="rounded mx-auto d-block" src="{{ site.baseurl
+					  }}/assets/images/router-dns-settings.png"></img>
+
+<h2>Finished setup</h2>
+<p>
+Once the router settings were applied everything on the network
+started talking with Pi Hole and I was able to access the web admin
+portal pretty easily.
+</p>
+
+<img class="rounded mx-auto d-block" src="{{ site.baseurl }}/assets/images/pihole-dashboard.png"/>
