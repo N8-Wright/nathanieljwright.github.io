@@ -1,1 +1,3 @@
-# nathanieljwright.github.io
+# nathanieljwright.com
+
+Development environment for my website!
