@@ -1,0 +1,119 @@
+﻿---
+layout: post
+author: nathan
+title: Learning about alternate data streams in NTFS
+---
+
+<p>
+There are many interesting things about the NTFS filesystem that I never knew existed
+(or, at least, haven't been relevant to me in the past).
+Currently, I've been learning about
+<a href="https://learn.microsoft.com/en-us/windows/win32/fileio/file-streams">alternate data streams</a>
+and the various ways that
+they can be used to store extra information <i>inline</i> alongside a file.
+</p>
+
+<p>
+Normally, I'd try to store information about a 
+file by creating an extra hidden file or folder where that information could 
+be stored separately. Say, for example, that you want to store a hash of a 
+file. The result of this approach would be your file <b>test.txt</b> and a hash 
+stored somewhere like <b>./.hidden/test.hash.txt</b>. This works, but adds 
+overhead to managing files since you'd need to move <b>test.txt</b> and it's 
+accompanying hidden metadata files around in tandem if you don't want to
+lose the hash data.
+</p>
+
+<p>
+Using alternate data strems, this hash can be stored <i>inline</i> with the
+file in question. Instead of storing the hash in a separate file, you could
+store it by writing to <b>test.txt:hash</b>. The colon separator followed
+by the name of the stream is how alternate data streams can be accessed on
+any file for reading and writing. Both powershell and the Win32 library give
+good access to these capabilities.
+</p>
+
+<h2>Getting a file's alternate data streams</h2>
+
+<h3>Powershell</h3>
+<code>
+Get-Item ./test.txt -Stream *
+</code>
+
+<h3>Win32</h3>
+<p>
+This code is taken from a project I've been working on, <a href= "https://github.com/N8-Wright/CommanderData">CommanderData</a>.
+Feel free to ignore this sample code if you want. The main idea is at least somewhat obfosucated by the use of boost coroutines. The 
+gist of things is to use the <a href= "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findf  irststreamw"> 
+FindFirstStream</a> and <a href= "https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findn  extstreamw">FindNextStream
+</a> functions to iterate through a file's streams.
+</p>
+
+<code>
+<pre>
+using boost::coroutine2;
+coroutine<WIN32_FIND_STREAM_DATA>::pull_type IterateStreams(const WCHAR* file)
+{
+	return coroutine<WIN32_FIND_STREAM_DATA>::pull_type(
+		[file](coroutine<WIN32_FIND_STREAM_DATA>::push_type& sink)
+		{
+			WIN32_FIND_STREAM_DATA findData{};
+			auto findHandle = FindFirstStreamW(file, FindStreamInfoStandard, &findData, 0);
+			if (findHandle == INVALID_HANDLE_VALUE)
+			{
+				BOOST_THROW_EXCEPTION(FilesystemException("Unable to iterate file streams") << FileNameInfo(file));
+			}
+			do
+			{
+				sink(findData);
+			} while (FindNextStreamW(findHandle, &findData) != 0);
+
+			FindClose(findHandle);
+			const auto lastError = GetLastError();
+			if (lastError != ERROR_HANDLE_EOF)
+			{
+				BOOST_THROW_EXCEPTION(FilesystemException("Unable to finish iterating file streams") << FileNameInfo(file));
+			}
+		}
+	);
+}
+</pre>
+</code>
+
+<h2>Reading/writing an alternate data stream</h2>
+<p>
+Reading and writing singular alternate data streams is incredibly simple. It's built in
+to the normal Win32 file functions. All you need to do is pass the "test.txt:<stream name>" 
+in as the file name instead of just "test.txt". For example, with
+<a href="https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew">CreateFile</a>:
+</p>
+
+<code>
+<pre>
+const auto readHandle = CreateFileW(
+	L"test.txt:hash",
+	GENERIC_READ,
+	FILE_SHARE_READ,
+	nullptr,
+	OPEN_EXISTING,
+	FILE_ATTRIBUTE_NORMAL,
+	nullptr);
+
+const auto writeHandle = CreateFileW(
+	L"test.txt:hash",
+	GENERIC_WRITE,
+	0,
+	nullptr,
+	CREATE_ALWAYS,
+	FILE_ATTRIBUTE_NORMAL,
+	nullptr);
+</pre>
+</code>
+
+<p>
+By using alternate data streams, you can avoid having to store separate information
+about a file in a different location. This makes moving files around much easier since
+you don't have to worry about any external data being lost or not relevant anymore. It
+also avoids any issues about clogging up a folder with generated metadata and just
+feels cleaner overall.
+</p>
