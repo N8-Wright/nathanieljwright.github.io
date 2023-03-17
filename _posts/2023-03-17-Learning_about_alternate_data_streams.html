@@ -83,7 +83,7 @@ coroutine<WIN32_FIND_STREAM_DATA>::pull_type IterateStreams(const WCHAR* file)
 <h2>Reading/writing an alternate data stream</h2>
 <p>
 Reading and writing singular alternate data streams is incredibly simple. It's built in
-to the normal Win32 file functions. All you need to do is pass the "test.txt:<stream name>" 
+to the normal Win32 file functions. All you need to do is pass the "test.txt:{stream name}"
 in as the file name instead of just "test.txt". For example, with
 <a href="https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew">CreateFile</a>:
 </p>
