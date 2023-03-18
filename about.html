@@ -2,6 +2,14 @@
 layout: default
 title: About
 ---
+<p>
+Hello! My name is Nathaniel Wright. I'm a software developer working at <a href="https://www.aveva.com/en/">AVEVA</a>.
+</p>
 
-<h1>About Page</h1>
-<p>This page tells you a little about me.</p>
+<ul>
+    {% for location in site.data.tips %}
+    <li>{{ location.name }}: {{ location.address }}</li>
+    {% endfor %}
+
+    <li><a href="{{site.baseurl}}/assets/Nathaniel Wright_0xB2F84B9B_public.asc">Public Key</a> (If you're into sending encrypted messages. I also try sign all of my code commits with this)</li>
+</ul>
