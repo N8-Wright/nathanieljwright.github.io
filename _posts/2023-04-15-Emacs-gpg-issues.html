@@ -1,0 +1,53 @@
+---
+layout: post
+author: nathan
+title: Emacs GPG Issues
+---
+
+<p>
+  I've been playing around with an Emacs setup on Manjaro for the past
+  day or two. Everything was going well until I tried to introduce my
+  gpg commit signing workflow that I've been trying to adhere to in my
+  personal projects. I set git's global config to always request a gpg
+  signature, but then whenever I'd go to commit anything in any
+  project I'd receive an error saying that gpg was using an
+  "inappropriate ioctl for device". This occurred when I was invoking
+  git commit from the command line or from emacs. To fix this, I
+  eventually found that I had to change some defaults in the gpg
+  config as well as the pinentry settings in Emacs.
+</p>
+
+<h1>GPG Command Line Fix</h1>
+<p>
+  I found the fix for the ioctl
+  issues <a href="https://d.sb/2016/11/gpg-inappropriate-ioctl-for-device-errors">here</a>. I
+  needed to create two files, gpg.conf and gpg-agent.conf and add the
+  following configuration entries to them.
+</p>
+
+<h2>gpg.conf</h2>
+<code>
+  <pre>
+    use-agent
+    pinentry-mode loopback
+  </pre>
+</code>
+
+<h2>gpg-agent.conf</h2>
+<code>
+  <pre>
+    allow-loopback-pinentry
+  </pre>
+</code>
+
+<h1>Emacs pinentry configuration</h1>
+For Emacs, I wanted to be able to input my gpg password into the minibuffer. This is accomplished by adding this line to init.el.
+
+<code>
+  <pre>
+    (setq epa-pinentry-mode 'loopback)
+  </pre>
+</code>
+
+
+
