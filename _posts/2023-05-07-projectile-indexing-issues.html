@@ -1,0 +1,70 @@
+---
+layout: post
+author: nathan
+title: Projectile Indexing Doesn't Respect .gitignore
+---
+
+<p>
+  Projectile is an amazing project management utility for Emacs. I've
+  been using it primarily for git repositories. It works great
+  combined with fuzzy finding in the command buffer to find files and
+  navigate a project structure quickly. Here is an example of what I
+  am talking about.
+</p>
+
+<img class="rounded mx-auto d-block" src="{{ site.baseurl
+}}/assets/images/ivy-fuzzy-M-x.png"></img>
+
+<p>
+  There has been one annoying thing about using Projectile on Windows
+  though. By default, the .gitignore file is ignored when finding
+  files within a project. This means that the selections given are
+  polluted with tons of files that I would never want to open.
+</p>
+
+<img class="rounded mx-auto d-block" src="{{ site.baseurl
+					  }}/assets/images/projectile-ignores-gitignore.png"></img>
+
+<p>
+  This is because on Windows, the default indexing method for project
+  files is set to native. This means that file indexing is done
+  natively in lisp and only respects the contents of a .projectile
+  file. I'd rather not create another configuration file in each
+  project I'm working on. Especially since this would just be a
+  repetition of the contents of what I already have in
+  .gitignore. Additionaly, it's a non-standard configuration file that
+  is meaningless for any other editor or anyone else that views my
+  code in other editors.
+</p>
+
+<p>
+  Fortunately, the indexing method can be easily set to an
+  alternative. The defaults for other operating systems (linux, mac,
+  etc.) is alien, which is what we want as well. Alien indexing relies
+  on an external command (git and find, for example) to do the
+  filtering. These commands understand the concept of .gitignore and
+  won't pass any files along to projectile that they are configured to
+  ignore. Since git and mysys binaries are usually installed on my
+  Windows machines, I feel comfortable relying on this behavior. Here
+  is how you can modify the default behavior.
+</p>
+
+<code>
+  <pre>
+    (use-package projectile
+      :config
+      (projectile-mode +1)
+      :custom
+      (projectile-indexing-method 'alien))
+  </pre>
+</code>
+
+<p>
+  This fixes the only major annoyance I've had with projectile! The
+  only noticeable difference between the two indexing modes (other
+  than one returning the expected results and the other not) is that
+  alien indexing produces a longer lag in receiving results than
+  native. I can only guess that this is because projectile needs to
+  spawn a git and/or find process to produce the results instead of
+  just recursively listing files in a project directory.
+</p>
