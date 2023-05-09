@@ -1,0 +1,40 @@
+---
+layout: post
+author: nathan
+title: Transferring Audiobooks to iPhone
+---
+
+<p>
+  Doing things the Apple way has never really clicked with me. This is
+  not a new complaint. It has been this way with Apple products
+  forever. However, it still bothers me. Especially when I'm hopping
+  around from Windows to Linux to whatever else I want to try
+  out. Syncing music, audiobooks and other files from my computer on
+  to my phone is my one consistent pain point. I just want to plug in
+  my phone, drag and drop my files onto it, and then move on with my
+  life. But Apple, in all their wisdom, thinks that having to use
+  iTunes or the built in MacOS file manager that obfuscates
+  everything. On Linux, I've had middling success in being able to
+  plug my phone in and have it be recognized as anything remotely
+  useful.
+</p>
+
+<p>
+  One consistently decent way of just getting a file onto the iPhone
+  has been spinning up a local web server that serves all the files in
+  a directory to anyone on the LAN. I can then navigate to {My
+  computer's local IP}:8080 and tap on the files to download them. I
+  can quickly spin up this local server by running something
+  like <code>ruby -run -e httpd .</code>. Substitute whichever
+  program/language you prefer or have available to you.
+</p>
+
+<img class="rounded mx-auto d-block" src="{{ site.baseurl
+}}/assets/images/local-http-server.png"></img>
+
+<p>
+  For audiobooks, transferring files this way sacrifices the ability
+  to play them in the default Books app. However, BookPlayer has been
+  a good alternative for me and is able to access files that end up in
+  the Files from this roundabout transfer method.
+</p>
