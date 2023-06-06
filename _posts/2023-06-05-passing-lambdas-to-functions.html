@@ -1,0 +1,79 @@
+---
+layout: post
+author: nathan
+title: Passing lambdas to functions in C++
+---
+
+<p>
+I ran into an interesting problem the other day when I was trying to write my
+own thread pool in some C++ code that I was working on. The thread pool
+accepts work and stores it internally in a queue of std::function&lt;void()&gt;.
+This allows any kind of simple function signature to be passed into the
+thread pool and executed once a thread becomes available. The ergonomic
+way to use this is by submitting a lambda function like:
+</p>
+
+<code>
+threadPool.Queue([] { std::cout &lt;&lt; “Printing from a worker thread.” &lt;&lt; std::endl); });
+</code>
+
+<p>
+This works fine for a lot of different lambdas that I tried, but falls apart
+when that lambda contains a capture of a move-only type. I had created a
+lambda that captured a HttpListenerResponse class which contains a TcpSocket
+that is written to with the web server’s response. TcpSocket is a move-only
+type since it is the sole owner of a socket handle which it closes upon
+running its destructor. This makes the resulting lambda a move-only type
+and causes all sorts of errors to be spewed out by the compiler when it
+attempts to shove it into a std::function. 
+</p>
+
+<code>
+<pre>
+auto context = listener.Receive();
+auto lambda = [response = std::move(context.Response)]
+{
+	const auto resp = HttpResponse(
+		HttpStatusCode::Ok,
+		std::unordered_map&lt;std::string, std::string&gt;
+		{
+			{"Server", "Neat Server (Win32)"},
+			{ "ContentType", "text/html" },
+		},
+		"&lt;html&gt;Hello world!&lt;/html&gt;");
+
+	const auto formattedResp = resp.Format();
+	response.Write(formattedResp);
+};
+
+threadPool.Queue(lambda);
+</pre>
+</code>
+
+<p>
+I will spare you the pagefuls of errors printed and just show the three relevant lines.
+</p>
+
+<code>
+<pre>
+..\webserver.cpp(43): note: 'main::<lambda_1>::<lambda_1>(const main::<lambda_1> &)': function was implicitly deleted because a data member invokes a deleted or inaccessible function 'Neat::Net::Http::Listener::HttpListenerResponse::HttpListenerResponse(const Neat::Net::Http::Listener::HttpListenerResponse &)'
+..\net\http\listener\http_listener_response.h(13): note: 'Neat::Net::Http::Listener::HttpListenerResponse::HttpListenerResponse(const Neat::Net::Http::Listener::HttpListenerResponse &)': function was implicitly deleted because a data member invokes a deleted or inaccessible function 'Neat::Net::Socket::TCPSocket::TCPSocket(const Neat::Net::Socket::TCPSocket &)'
+..\net\socketstcp_socket.h(17): note: 'Neat::Net::Socket::TCPSocket::TCPSocket(const Neat::Net::Socket::TCPSocket &)': function was explicitly deleted
+</pre>
+</code>
+
+<p>
+Once I understood that the issue was a deleted copy method I was pointed to a
+great <a href="https://youtu.be/3jCOwajNch0?t=3037">CppCon video</a> that
+covers this exact problem. The solution (for now) is to wrap the move-only
+lambda inside a shared pointer which CAN be copied around. There other solution suggest
+in the talk was a move-only function type. One could write their own, or wait for C++23
+where <a href="https://en.cppreference.com/w/cpp/utility/functional/move_only_function">std::move_only_function</a>
+will be a thing. I may try to write my own move-only function in the future just for
+educational purposes.
+</p>
+
+<code>
+threadPool.Queue([p = std::make_shared<decltype(lambda)>(std::move(lambda))]() { (*p)(); });
+</code>
+
