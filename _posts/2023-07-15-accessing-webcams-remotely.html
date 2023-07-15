@@ -1,0 +1,56 @@
+---
+layout: post
+author: nathan
+title: Accessing Webcams Remotely
+---
+
+<p>
+  Ellie and I are on a quick weekend trip to attend a wedding in Bear
+  Valley. We’re leaving behind our two cats in what is supposed to be
+  quite a hot weekend: highs of 98 and 97 degrees on Saturday and
+  Sunday. We’ve left the cats on their own over the weekend
+  before. They have automatic feeders and enough water to last twice
+  that amount of time. And this time around, we’ve even left the AC on so
+  that they are nice and comfortable despite the heat.
+</p>
+
+<p>
+  Even knowing they would be fine; I took the opportunity to
+  experiment with accessing my desktop’s webcam remotely so that we
+  could check up on them whenever we are away. We left town with the
+  jankiest home security setup imaginable… two webcams taped to a box
+  pointing in different directions in the middle of the hallway. Both
+  cameras aren’t hooked up to any special software (although I did
+  take a look at trying to set up motion or Shinobi, but they are
+  meant for something a bit more serious than usb cameras). They are
+  accessible over ssh where I can pipe some ffmpeg output into a video
+  player on my laptop.
+</p>
+
+<p>
+  Here is the script that I've mostly taken from a nice
+  <a href=https://unix.stackexchange.com/questions/2302/can-i-pipe-dev-video-over-ssh>stackexchange
+  post</a>. By using tailscale, I'm able to easily ssh into my desktop
+  at home with the ip address they provide.
+</p>
+
+<code>
+  ssh user@ip ffmpeg -an -f video4linux2 -s 640x480 -i /dev/video2 -r 10 -b:v 500k -f matroska - | mplayer - -idle
+</code>
+
+<br>
+<br>
+<p>
+  And here is what it looks like accessing the webcam from my laptop:
+
+  <img class="img-fluid rounded mx-auto d-block" src="{{ site.baseurl
+  }}/assets/images/remote-webcam-test.webp" alt="Remote Webcam
+  Test" />
+</p>
+
+<p>
+  It's been fun to see what the cats have been up to while we are
+  gone! And it's a bit more peace of mind that they haven't gotten up
+  to anything too crazy 😺.
+</p>
+
