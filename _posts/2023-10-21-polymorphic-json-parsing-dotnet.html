@@ -1,0 +1,384 @@
+﻿---
+layout: post
+author: nathan
+title: Polymorphic JSON parsing using System.Text.Json
+---
+
+<p>
+    I ran into a deserialization problem recently when trying to write a C# wrapper around
+    the <a href="https://restic.net">restic</a> cli program for a
+    <a href="https://github.com/N8-Wright/Doublin">project that I'm
+    working on</a>.  Unfortunately, restic does not provide any way to
+    consume it as a library. However, there is a command line flag
+    that most subcommands honor that converts any and all output into
+    a json format that can be more easily consumed by other programs.
+    <a href="https://restic.readthedocs.io/en/stable/075_scripting.html">Here</a>
+    is some helpful documentation on the output format of many common commands. Say,
+    for example, that we want to parse the output of a backup subcommand. There are
+    several different "message_type"s that are written to stdout depending on which
+    stage the backup process is in.
+</p>
+
+<div class="row">
+    <div class="col">
+        <h4>
+            <a href="https://restic.readthedocs.io/en/stable/075_scripting.html#status">
+                Backup Status
+            </a>
+        </h4>
+        <table border="1" class="docutils">
+            <colgroup>
+                <col width="27%" />
+                <col width="73%" />
+            </colgroup>
+            <tbody valign="top">
+                <tr class="row-odd">
+                    <td><code class="docutils literal notranslate"><span class="pre">message_type</span></code></td>
+                    <td>Always “status”</td>
+                </tr>
+                <tr class="row-even">
+                    <td><code class="docutils literal notranslate"><span class="pre">seconds_elapsed</span></code></td>
+                    <td>Time since backup started</td>
+                </tr>
+                <tr class="row-odd">
+                    <td><code class="docutils literal notranslate"><span class="pre">seconds_remaining</span></code>
+                    </td>
+                    <td>Estimated time remaining</td>
+                </tr>
+                <tr class="row-even">
+                    <td><code class="docutils literal notranslate"><span class="pre">percent_done</span></code></td>
+                    <td>Percentage of data backed up (bytes_done/total_bytes)</td>
+                </tr>
+                <tr class="row-odd">
+                    <td><code class="docutils literal notranslate"><span class="pre">total_files</span></code></td>
+                    <td>Total number of files detected</td>
+                </tr>
+                <tr class="row-even">
+                    <td><code class="docutils literal notranslate"><span class="pre">files_done</span></code></td>
+                    <td>Files completed (backed up to repo)</td>
+                </tr>
+                <tr class="row-odd">
+                    <td><code class="docutils literal notranslate"><span class="pre">total_bytes</span></code></td>
+                    <td>Total number of bytes in backup set</td>
+                </tr>
+                <tr class="row-even">
+                    <td><code class="docutils literal notranslate"><span class="pre">bytes_done</span></code></td>
+                    <td>Number of bytes completed (backed up to repo)</td>
+                </tr>
+                <tr class="row-odd">
+                    <td><code class="docutils literal notranslate"><span class="pre">error_count</span></code></td>
+                    <td>Number of errors</td>
+                </tr>
+                <tr class="row-even">
+                    <td><code class="docutils literal notranslate"><span class="pre">current_files</span></code></td>
+                    <td>List of files currently being backed up</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col">
+        <h4>
+            <a href="https://restic.readthedocs.io/en/stable/075_scripting.html#error">
+                Backup Error
+            </a>
+        </h4>
+        <table border="1" class="docutils">
+            <colgroup>
+                <col width="34%" />
+                <col width="66%" />
+            </colgroup>
+            <tbody valign="top">
+                <tr class="row-odd">
+                    <td><code class="docutils literal notranslate"><span class="pre">message_type</span></code></td>
+                    <td>Always “error”</td>
+                </tr>
+                <tr class="row-even">
+                    <td><code class="docutils literal notranslate"><span class="pre">error</span></code></td>
+                    <td>Error message</td>
+                </tr>
+                <tr class="row-odd">
+                    <td><code class="docutils literal notranslate"><span class="pre">during</span></code></td>
+                    <td>What restic was trying to do</td>
+                </tr>
+                <tr class="row-even">
+                    <td><code class="docutils literal notranslate"><span class="pre">item</span></code></td>
+                    <td>Usually, the path of the problematic file</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="col">
+        <h4>
+            <a href="https://restic.readthedocs.io/en/stable/075_scripting.html#summary">
+                Backup Summary
+            </a>
+        </h4>
+        <table border="1" class="docutils">
+            <colgroup>
+                <col width="32%" />
+                <col width="68%" />
+            </colgroup>
+            <tbody valign="top">
+                <tr class="row-odd">
+                    <td><code class="docutils literal notranslate"><span class="pre">message_type</span></code></td>
+                    <td>Always “summary”</td>
+                </tr>
+                <tr class="row-even">
+                    <td><code class="docutils literal notranslate"><span class="pre">files_new</span></code></td>
+                    <td>Number of new files</td>
+                </tr>
+                <tr class="row-odd">
+                    <td><code class="docutils literal notranslate"><span class="pre">files_changed</span></code></td>
+                    <td>Number of files that changed</td>
+                </tr>
+                <tr class="row-even">
+                    <td><code class="docutils literal notranslate"><span class="pre">files_unmodified</span></code></td>
+                    <td>Number of files that did not change</td>
+                </tr>
+                <tr class="row-odd">
+                    <td><code class="docutils literal notranslate"><span class="pre">dirs_new</span></code></td>
+                    <td>Number of new directories</td>
+                </tr>
+                <tr class="row-even">
+                    <td><code class="docutils literal notranslate"><span class="pre">dirs_changed</span></code></td>
+                    <td>Number of directories that changed</td>
+                </tr>
+                <tr class="row-odd">
+                    <td><code class="docutils literal notranslate"><span class="pre">dirs_unmodified</span></code></td>
+                    <td>Number of directories that did not change</td>
+                </tr>
+                <tr class="row-even">
+                    <td><code class="docutils literal notranslate"><span class="pre">data_blobs</span></code></td>
+                    <td>Number of data blobs</td>
+                </tr>
+                <tr class="row-odd">
+                    <td><code class="docutils literal notranslate"><span class="pre">tree_blobs</span></code></td>
+                    <td>Number of tree blobs</td>
+                </tr>
+                <tr class="row-even">
+                    <td><code class="docutils literal notranslate"><span class="pre">data_added</span></code></td>
+                    <td>Amount of data added, in bytes</td>
+                </tr>
+                <tr class="row-odd">
+                    <td><code class="docutils literal notranslate"><span class="pre">total_files_processed</span></code>
+                    </td>
+                    <td>Total number of files processed</td>
+                </tr>
+                <tr class="row-even">
+                    <td><code class="docutils literal notranslate"><span class="pre">total_bytes_processed</span></code>
+                    </td>
+                    <td>Total number of bytes processed</td>
+                </tr>
+                <tr class="row-odd">
+                    <td><code class="docutils literal notranslate"><span class="pre">total_duration</span></code></td>
+                    <td>Total time it took for the operation to complete</td>
+                </tr>
+                <tr class="row-even">
+                    <td><code class="docutils literal notranslate"><span class="pre">snapshot_id</span></code></td>
+                    <td>ID of the new snapshot</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<p>
+    Notice that each JSON object has a unique "message_type" property
+    that is always at the beginning.  The output of each subcommand
+    (especially those that take a long time like backups) is generally
+    a JSON object per line. So, in order to decode each message type
+    into a distinct C# object, we need to partially deserialize until
+    we can determine the message_type and only then can we know what
+    object to tell System.Text.Json to deserialize the whole line to.
+</p>
+<p>
+    Here are the example C# classes that we want to deserialize these
+    JSON objects into:
+</p>
+
+<div class="container-fluid">
+    <div class="row">
+        <div clas="col">
+{% highlight csharp %}
+public class BackupBase
+{
+    [JsonPropertyName("message_type")]
+    public string MessageType { get; }
+}
+{% endhighlight %}
+        </div>
+
+        <div class="col">
+{% highlight csharp %}
+public class BackupStatus : BackupBase
+{
+    [JsonPropertyName("percent_done")]
+    public double PercentDone { get; }
+
+    [JsonPropertyName("total_files")]
+    public long TotalFiles { get; }
+
+    [JsonPropertyName("files_done")]
+    public long FilesDone { get; }
+
+    [JsonPropertyName("total_bytes")]
+    public long TotalBytes { get; }
+
+    [JsonPropertyName("bytes_done")]
+    public long BytesDone { get; }
+
+    [JsonPropertyName("current_files")]
+    public List<string>? CurrentFiles { get; }
+
+    [JsonPropertyName("seconds_remaining")]
+    public int? SecondsRemaining { get; }
+}
+{% endhighlight %}
+        </div>
+
+        <div class="col">
+{% highlight csharp %}
+public class BackupError : BackupBase
+{
+    public string Error { get; }
+
+    public string During { get; }
+
+    public string Item { get; }
+}
+{% endhighlight %}
+        </div>
+        <div class="col">
+{% highlight csharp %}
+public class BackupSummary : BackupBase
+{
+    [JsonPropertyName("files_new")]
+    public long FilesNew { get; }
+
+    [JsonPropertyName("files_changed")]
+    public long FilesChanged { get; }
+
+    [JsonPropertyName("files_unmodified")]
+    public long FilesUnmodified { get; }
+
+    [JsonPropertyName("dirs_new")]
+    public long DirsNew { get; }
+
+    [JsonPropertyName("dirs_changed")]
+    public long DirsChanged { get; }
+
+    [JsonPropertyName("dirs_unmodified")]
+    public long DirsUnmodified { get; }
+
+    [JsonPropertyName("data_blobs")]
+    public long DataBlobs { get; }
+
+    [JsonPropertyName("tree_blobs")]
+    public long TreeBlobs { get; }
+
+    [JsonPropertyName("data_added")]
+    public long DataAdded { get; }
+
+    [JsonPropertyName("total_files_processed")]
+    public long TotalFilesProcessed { get; }
+
+    [JsonPropertyName("total_bytes_processed")]
+    public long TotalBytesProcessed { get; }
+
+    [JsonPropertyName("total_duration")]
+    public double TotalDuration { get; }
+
+    [JsonPropertyName("snapshot_id")]
+    public string SnapshotId { get; }
+}
+{% endhighlight %}
+        </div>
+    </div>
+</div>
+
+<p>
+  We need a way to decide based on the message_type of the JSON object
+  what C# class should be used to fully deserialize the message. This
+  is kind of difficult because we need to deserialize at least part of
+  the JSON object and get the first key/value pair to decide how the
+  rest of the object should be interpreted. In C# using the
+  System.Text.Json library, the way to do any kind of custom
+  deserialization is by providing your own custom JsonConverter that
+  the library will then use in certain situations. By creating our own
+  we get access to a lot of powerful underlying methods inside the
+  Utf8JsonReader that is passed into our custom JsonConverter (in this
+  case, the ResticBackupConverter).
+</p>
+<p>
+  So, we somehow need a way for our custom converter read the first
+  bit of the JSON object, decide what child class the object is
+  actually representing, and then fully deserialize as the child
+  class. Since there is no way, as far as I know, to have converters
+  for the parent and child classes and just handoff between them, we
+  need a way to preserve where the beginning of the JSON object
+  is. The key insight here is that the Utf8JsonReader that is supposed
+  to be used for implemeting the custom deserialization logic is a
+  struct. Because of this, copies of it, along with all of its
+  internal state are incredibly easy. So before we do any of our
+  parsing, we can make a copy of the reader to preserve it's original
+  state. We then can parse out the message_type that we need and once
+  the concrete child class is decided on, use the copy we took at the
+  beginning to start over, but now with all the information we need!
+</p>
+
+{% highlight csharp %}
+public class ResticBackupConverter : JsonConverter<BackupBase>
+{
+    public override BackupBase? Read(ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options)
+    {
+        // 1. Checkpoint before we start parsing the object.
+        var copy = reader;
+
+        if (reader.TokenType != JsonTokenType.StartObject)
+        {
+            throw new JsonException("Expected '{'");
+        }
+
+        // 2. Parse out the "message_type" key and value
+        if (!reader.Read()
+            || reader.TokenType != JsonTokenType.PropertyName
+            || reader.GetString() != "message_type")
+        {
+            throw new JsonException("Expected property name 'message_type'");
+        }
+
+        if (!reader.Read()
+            || reader.TokenType != JsonTokenType.String)
+        {
+            throw new JsonException("Expected value of type String");
+        }
+
+        var messageType = reader.GetString();
+
+        // 3. Decide based on the message_type what type of child class of BackupBase should be deserialized.
+        ResticBackupResponseBase? baseResponse = messageType switch
+        {
+            // NOTE that we are using the copied checkpoint to parse from the beggining of the object.
+            "status" => JsonSerializer.Deserialize<BackupStatus>(ref copy, options),
+            "error" => JsonSerializer.Deserialize<BackupError>(ref copy, options),
+            "summary" => JsonSerializer.Deserialize<BackupSummary>(ref copy, options),
+            _ => throw new JsonException("Unknown backup message type"),
+        };
+
+        reader = copy;
+        return baseResponse;
+    }
+
+    public override void Write(Utf8JsonWriter writer,
+        ResticBackupResponseBase value,
+        JsonSerializerOptions options)
+    {
+        throw new NotImplementedException();
+    }
+}
+{% endhighlight %}
+</div>
