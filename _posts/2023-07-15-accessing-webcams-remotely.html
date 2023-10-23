@@ -34,9 +34,9 @@ title: Accessing Webcams Remotely
   at home with the ip address they provide.
 </p>
 
-<code>
+{% highlight shell %}
   ssh user@ip ffmpeg -an -f video4linux2 -s 640x480 -i /dev/video2 -r 10 -b:v 500k -f matroska - | mplayer - -idle
-</code>
+{% endhighlight %}
 
 <br>
 <br>

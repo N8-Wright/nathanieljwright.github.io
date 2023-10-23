@@ -13,9 +13,10 @@ thread pool and executed once a thread becomes available. The ergonomic
 way to use this is by submitting a lambda function like:
 </p>
 
-<code>
-threadPool.Queue([] { std::cout &lt;&lt; “Printing from a worker thread.” &lt;&lt; std::endl); });
-</code>
+{% highlight cpp %}
+threadPool.Queue([] { std::cout << "Printing from a worker thread." << std::endl); });
+{% endhighlight %}
+
 
 <p>
 This works fine for a lot of different lambdas that I tried, but falls apart
@@ -28,39 +29,35 @@ and causes all sorts of errors to be spewed out by the compiler when it
 attempts to shove it into a std::function. 
 </p>
 
-<code>
-<pre>
+{% highlight cpp %}
 auto context = listener.Receive();
 auto lambda = [response = std::move(context.Response)]
 {
 	const auto resp = HttpResponse(
 		HttpStatusCode::Ok,
-		std::unordered_map&lt;std::string, std::string&gt;
+		std::unordered_map<std::string, std::string>
 		{
 			{"Server", "Neat Server (Win32)"},
 			{ "ContentType", "text/html" },
 		},
-		"&lt;html&gt;Hello world!&lt;/html&gt;");
+		"<html>Hello world!</html>");
 
 	const auto formattedResp = resp.Format();
 	response.Write(formattedResp);
 };
 
 threadPool.Queue(lambda);
-</pre>
-</code>
+{% endhighlight %}
 
 <p>
 I will spare you the pagefuls of errors printed and just show the three relevant lines.
 </p>
 
-<code>
-<pre>
+{% highlight shell %}
 ..\webserver.cpp(43): note: 'main::<lambda_1>::<lambda_1>(const main::<lambda_1> &)': function was implicitly deleted because a data member invokes a deleted or inaccessible function 'Neat::Net::Http::Listener::HttpListenerResponse::HttpListenerResponse(const Neat::Net::Http::Listener::HttpListenerResponse &)'
 ..\net\http\listener\http_listener_response.h(13): note: 'Neat::Net::Http::Listener::HttpListenerResponse::HttpListenerResponse(const Neat::Net::Http::Listener::HttpListenerResponse &)': function was implicitly deleted because a data member invokes a deleted or inaccessible function 'Neat::Net::Socket::TCPSocket::TCPSocket(const Neat::Net::Socket::TCPSocket &)'
 ..\net\socketstcp_socket.h(17): note: 'Neat::Net::Socket::TCPSocket::TCPSocket(const Neat::Net::Socket::TCPSocket &)': function was explicitly deleted
-</pre>
-</code>
+{% endhighlight %}
 
 <p>
 Once I understood that the issue was a deleted copy method I was pointed to a
@@ -73,7 +70,6 @@ will be a thing. I may try to write my own move-only function in the future just
 educational purposes.
 </p>
 
-<code>
+{% highlight cpp %}
 threadPool.Queue([p = std::make_shared<decltype(lambda)>(std::move(lambda))]() { (*p)(); });
-</code>
-
+{% endhighlight %}

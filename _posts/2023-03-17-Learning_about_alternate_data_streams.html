@@ -36,9 +36,9 @@ good access to these capabilities.
 <h2>Getting a file's alternate data streams</h2>
 
 <h3>Powershell</h3>
-<code>
+{% highlight powershell %}
 Get-Item ./test.txt -Stream *
-</code>
+{% endhighlight %}
 
 <h3>Win32</h3>
 <p>
@@ -49,8 +49,7 @@ FindFirstStream</a> and <a href= "https://learn.microsoft.com/en-us/windows/win3
 </a> functions to iterate through a file's streams.
 </p>
 
-<code>
-<pre>
+{% highlight cpp %}
 using boost::coroutine2;
 coroutine<WIN32_FIND_STREAM_DATA>::pull_type IterateStreams(const WCHAR* file)
 {
@@ -77,8 +76,7 @@ coroutine<WIN32_FIND_STREAM_DATA>::pull_type IterateStreams(const WCHAR* file)
 		}
 	);
 }
-</pre>
-</code>
+{% endhighlight %}
 
 <h2>Reading/writing an alternate data stream</h2>
 <p>
@@ -88,8 +86,7 @@ in as the file name instead of just "test.txt". For example, with
 <a href="https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-createfilew">CreateFile</a>:
 </p>
 
-<code>
-<pre>
+{% highlight cpp %}
 const auto readHandle = CreateFileW(
 	L"test.txt:hash",
 	GENERIC_READ,
@@ -107,8 +104,7 @@ const auto writeHandle = CreateFileW(
 	CREATE_ALWAYS,
 	FILE_ATTRIBUTE_NORMAL,
 	nullptr);
-</pre>
-</code>
+{% endhighlight %}
 
 <p>
 By using alternate data streams, you can avoid having to store separate information
