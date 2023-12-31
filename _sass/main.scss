@@ -144,3 +144,11 @@ body {
 .highlight .ss {
     color: #90a959;
 }
+
+
+table {
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
+    border: 3px solid;
+}

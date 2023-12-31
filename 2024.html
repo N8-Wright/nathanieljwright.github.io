@@ -1,0 +1,27 @@
+---
+layout: default
+title: 2024 Goals
+---
+<table id="milesWalked">
+    <tr>
+        <th>Date</th>
+        <th>Miles Walked</th>
+    </tr>
+    <tr>
+        <td><time datetime="2023-12-31">December 31st</time></td>
+        <td>3.49</td>
+    </tr>
+</table>
+
+<script>
+    var table = document.getElementById("milesWalked");
+    let totalMilesWalked = Array.from(table.rows).slice(1).reduce((total, row) => {
+        return total + parseFloat(row.cells[1].innerHTML);
+    }, 0);
+
+    const header = document.createElement("h4");
+    header.textContent = "Total Miles Walked: " + totalMilesWalked;
+
+    const navbar = document.getElementsByClassName("container")[0];
+    navbar.insertAdjacentElement("afterbegin", header);
+</script>

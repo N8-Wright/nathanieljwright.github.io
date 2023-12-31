@@ -1,20 +1,21 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light" aria-label="Site Navigation">
+<nav class="navbar navbar-expand-lg navbar-light bg-light" aria-label="Site Navigation" id="siteNavbar">
     <div class="container-fluid">
         <a class="navbar-brand" href="{{ site.baseurl}}/">Nathaniel Wright</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#siteNavbar" aria-controls="siteNavbar" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#siteNavbar"
+            aria-controls="siteNavbar" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="siteNavbar">
             <ul class="navbar-nav mr-auto">
                 {% for item in site.data.navigation %}
-                    <li class="nav-item">
-                        <a class="nav-link{% if page.url == item.link %} active{% endif %}"{% if page.url == item.link %} aria-current="page"{% endif %} href="{{ site.baseurl }}{{ item.link }}">
-                            {{ item.name }}
-                        </a>
-                    </li>
+                <li class="nav-item">
+                    <a class="nav-link{% if page.url == item.link %} active{% endif %}" {% if page.url==item.link %}
+                        aria-current="page" {% endif %} href="{{ site.baseurl }}{{ item.link }}">
+                        {{ item.name }}
+                    </a>
+                </li>
                 {% endfor %}
             </ul>
         </div>
     </div>
 </nav>
-
